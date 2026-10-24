@@ -138,6 +138,25 @@
     #resName { font-size:28px; } #throwBtn { padding:4px 30px; font-size:18px; } .chip { font-size:14px; }
     #boardWrap { width:min(100%, calc(100dvh - 320px)); }
   }
+  #overlay .row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  #overlay .row button { min-width:0; }
+  #overlay input {
+    background:#fff; border:3px solid var(--ink); color:var(--ink); box-shadow:0 4px 0 var(--ink);
+    font-size:18px; font-family:inherit; text-align:center;
+    border-radius:999px; padding:8px 16px; width:210px; user-select:text; outline:none;
+  }
+  #overlay input::placeholder { color:#a99fc9; }
+  #overlay input:focus { box-shadow:0 4px 0 var(--ink), 0 0 0 4px rgba(255,210,63,.6); }
+  #overlay .join input { width:124px; letter-spacing:.2em; text-transform:uppercase; }
+  #overlay .error { font-size:15px; color:#ffb3c4; min-height:1em; paint-order:stroke fill; -webkit-text-stroke:4px var(--ink); }
+  #overlay .back { background:none; border:none; box-shadow:none; color:#fff; font-size:16px; cursor:pointer; padding:6px; font-family:inherit; opacity:.9; min-width:0; }
+  #overlay .code { color:var(--yellow); font-weight:400; paint-order:stroke fill; -webkit-text-stroke:6px var(--ink); text-shadow:0 5px 0 var(--ink); font-size:56px; letter-spacing:.16em; font-variant-numeric:tabular-nums; -webkit-user-select:text; user-select:text; -webkit-touch-callout:default; }
+  #overlay .dots { display:flex; gap:10px; }
+  #overlay .dots span { width:14px; height:14px; border-radius:50%; background:var(--yellow); border:3px solid var(--ink); animation:blink 1.2s infinite; }
+  #overlay .dots span:nth-child(2) { animation-delay:.2s; }
+  #overlay .dots span:nth-child(3) { animation-delay:.4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity:.25; transform:scale(.85); } 40% { opacity:1; transform:scale(1); } }
+  #netDown { display:none; font-size:13px; color:#ffb3c4; text-shadow:0 2px 0 var(--ink); }
 </style>
 </head>
 <body>
@@ -147,6 +166,7 @@
       <div class="item score"><span class="value" id="turn">윷놀이</span></div>
       <div class="item"><span class="label">WIN</span><span class="value" id="wins">0</span></div>
       <div class="icons">
+        <button id="resignBtn" title="기권" style="display:none">🏳</button>
         <button id="muteBtn" title="소리 (M)">🔊</button>
       </div>
     </div>

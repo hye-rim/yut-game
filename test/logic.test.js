@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert');
-const L = require('../logic.js');
+const L = require('../public/logic.js');
 
 // 칸을 정해 놓고 시작하는 판 (owner 0 의 말 id 0~3, owner 1 의 말 id 4~7)
 function setup(places = {}) {
