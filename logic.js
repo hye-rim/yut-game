@@ -4,7 +4,7 @@
 //
 // - 윷 네 개를 던져 평평한 면(배)이 몇 개 나오느냐로 정한다: 1개 도(1칸) · 2개 개(2칸) · 3개 걸(3칸) · 4개 윷(4칸) · 0개 모(5칸)
 // - 윷이나 모가 나오거나 상대 말을 잡으면 한 번 더 던진다. 던진 결과는 쌓아 두었다가 원하는 말에 하나씩 쓴다
-// - 판: 바깥 길 20칸 + 지름길. 모서리(5번, 10번)에 멈췄다가 다음에 움직이면 지름길로 질러가고, 가운데(22번)에서는 곧장 이어진다
+// - 판: 바깥 길 20칸 + 지름길. 모서리(5번, 10번)에 멈췄다가 다음에 움직이면 지름길로 질러간다. 가운데(22번)에 멈췄다가 움직이면 출발점(우하단) 쪽으로, 지름길을 타고 가운데를 지나가는 중이면 곧장 이어진다
 // - 도착점(출발점)을 지나치면 완주. 내 말 4개를 먼저 모두 완주시키면 이긴다
 // - 상대 말이 있는 칸에 멈추면 그 말을 모두 잡아 대기로 돌려보내고, 내 말이 있는 칸에 멈추면 업어서 함께 움직인다
 // - 백도(뒤로 한 칸)는 넣지 않았다
@@ -54,7 +54,7 @@ function stepOnce(pos, via, first) {
   switch (pos) {
     case 20: return { pos: 21, via: 'A' };
     case 21: return { pos: 22, via: 'A' };
-    case 22: return via === 'A' ? { pos: 23, via: 'A' } : { pos: 27, via: 'B' };
+    case 22: return !first && via === 'A' ? { pos: 23, via: 'A' } : { pos: 27, via: 'B' };   // 가운데에 멈췄다가 출발하면 출발점(우하단) 쪽, 지름길을 타고 지나가는 중이면 곧장
     case 23: return { pos: 24, via: 'A' };
     case 24: return { pos: 15, via: null };
     case 25: return { pos: 26, via: 'B' };
@@ -79,8 +79,10 @@ function advance(pos, via, steps) {
 // 도착까지 남은 걸음 수 (모서리에 서게 되면 지름길을 탄다고 보고 센다. 컴퓨터가 고를 때만 쓰는 어림값)
 function remaining(pos, via) {
   let p = pos, v = via, n = 0;
+  let first = true;
   for (;;) {
-    const s = stepOnce(p, v, true);
+    const s = stepOnce(p, v, first || p === 5 || p === 10);
+    first = false;
     n++;
     if (s.done) return n;
     p = s.pos; v = s.via;

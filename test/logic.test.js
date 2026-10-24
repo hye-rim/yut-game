@@ -44,11 +44,14 @@ test('corner shortcut is taken only when the move starts on the corner', () => {
   assert.deepStrictEqual(L.advance(15, null, 2).path, [16, 17]);             // 15 번에는 지름길이 없다
 });
 
-test('center continues straight on both diagonals', () => {
+test('passing through the center continues straight, stopping on it turns toward the start', () => {
   assert.deepStrictEqual(L.advance(21, 'A', 4).path, [22, 23, 24, 15]);
   assert.deepStrictEqual(L.advance(26, 'B', 3).path, [22, 27, 28]);
-  assert.deepStrictEqual(L.advance(22, 'A', 3).path, [23, 24, 15]);
+  assert.deepStrictEqual(L.advance(22, 'A', 3).path, [27, 28, 'done']);     // 가운데에 멈춘 말은 어느 길로 왔든 우하단으로
   assert.deepStrictEqual(L.advance(22, 'B', 3).path, [27, 28, 'done']);
+  assert.deepStrictEqual(L.advance(22, 'A', 1).path, [27]);
+  assert.deepStrictEqual(L.advance(L.WAIT, null, 5).pos, 5);
+  assert.deepStrictEqual(L.advance(20, 'A', 2).path, [21, 22]);               // 가운데에 닿기만 하면 아직 방향이 정해지지 않는다
   const r = L.advance(24, 'A', 3);
   assert.deepStrictEqual(r.path, [15, 16, 17]);
   assert.strictEqual(r.via, null);
@@ -187,7 +190,7 @@ test('landing on your own piece stacks and the stack moves together', () => {
   const r2 = L.move(st, 0, 5);                                         // 5 번에서 출발: 지름길
   assert.deepStrictEqual(r2.path, [20, 21, 22]);
   assert.deepStrictEqual(r2.moving.sort(), [0, 1]);
-  assert.deepStrictEqual([st.pieces[0].pos, st.pieces[1].pos, st.pieces[0].via, st.pieces[1].via], [22, 22, 'A', 'A']);
+  assert.deepStrictEqual([st.pieces[0].pos, st.pieces[1].pos], [22, 22]);
 });
 
 test('enemy stack is captured as a whole and stacking with a captured square works', () => {
