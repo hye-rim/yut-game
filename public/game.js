@@ -93,6 +93,7 @@ function buildBoard() {
   }
   const t = mk('text', { x: BR[0], y: BR[1], class: 'lbl', 'dominant-baseline': 'central' });
   t.style.fill = INK; t.textContent = '출발';
+  markLayer = mk('g', { id: 'marks' });
   const piecesLayer = mk('g', { id: 'pieces' });
   for (const p of st.pieces) {
     const g = mk('g', { class: 'pc' }, piecesLayer);
@@ -107,6 +108,7 @@ function buildBoard() {
 }
 
 // ---------- 상태 ----------
+let markLayer = null, lastMark = null;   // 상대가 방금 옮긴 말 표시 (컴퓨터 모드는 lastMark, 온라인은 room.lastMove)
 let st = L.newGame();             // 화면에 그리는 판 (온라인에서는 서버가 보낸 판)
 let mode = 'easy';                // 'easy' · 'hard' (컴퓨터) · 'online'
 let playing = false, busy = false, sel = 0, overTimer = 0, animTimer = 0;
@@ -216,7 +218,20 @@ function renderActions() {
 function render() {
   if (sel >= st.pending.length) sel = 0;
   renderTray($('trayOp'), 1 - meOwner()); renderTray($('trayMe'), meOwner());
-  renderPieces(); renderGhosts(); renderChips(); renderHud(); renderActions();
+  renderMarks(); renderPieces(); renderGhosts(); renderChips(); renderHud(); renderActions();
+}
+// 상대가 방금 옮긴 말: 출발했던 칸은 점선 고리, 도착한 칸은 반짝이는 고리. 내가 움직이면 사라진다
+function renderMarks() {
+  if (!markLayer) return;
+  markLayer.innerHTML = '';
+  const m = online() ? (room && room.lastMove) : lastMark;
+  if (!m || m.who === meOwner()) return;
+  const ring = (pos, cls, dash) => {
+    if (!(pos >= 1 && pos <= 28)) return;
+    mk('circle', { class: cls, cx: POS[pos][0], cy: POS[pos][1], r: 17, fill: 'none', stroke: '#ff9f1c', 'stroke-width': 4, 'stroke-dasharray': dash }, markLayer);
+  };
+  ring(m.from, 'mark from', '4 4');
+  ring(m.to, 'mark to', '');
 }
 function say(t) { $('msg').textContent = t; }
 
@@ -275,6 +290,7 @@ function onGroup(pos) {
   const who = st.turn;
   const r = L.move(st, sel, pos);
   if (!r) return;
+  lastMark = { who, from: r.from, to: r.to };
   busy = true; sel = 0;
   describeMove(who, { captured: r.captured, done: r.done, stacked: r.stacked, moving: r.moving.length });
   tutorialSignal('move'); if (r.captured) tutorialSignal('capture');
@@ -304,6 +320,7 @@ function cpuStep() {
   if (!pick) { busy = false; return; }
   const who = st.turn;
   const r = L.move(st, pick.idx, pick.groupPos);
+  lastMark = { who, from: r.from, to: r.to };
   describeMove(who, { captured: r.captured, done: r.done, stacked: r.stacked, moving: r.moving.length });
   render();
   setTimeout(advance, T.cpu);
@@ -313,7 +330,7 @@ function cpuStep() {
 function startGame(m) {
   leaveOnline();
   clearTimeout(overTimer); clearTimeout(animTimer);
-  mode = m; st = L.newGame(); playing = true; busy = false; sel = 0;
+  mode = m; st = L.newGame(); playing = true; busy = false; sel = 0; lastMark = null;
   buildBoard(); showSticks(null); $('resName').textContent = ''; say('');
   hideOverlay();
   render();
